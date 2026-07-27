@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>刷题追踪 Pro — 考研考公助手</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}body{font-family:-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:#f0f4f8;color:#1a2332;min-height:100vh;display:flex}
+.sidebar{width:200px;background:#1a2332;color:#c8d0dc;flex-shrink:0;display:flex;flex-direction:column;position:sticky;top:0;height:100vh}
+.sidebar .brand{padding:20px 16px;font-size:16px;font-weight:700;color:#fff;border-bottom:1px solid rgba(255,255,255,.08)}
+.sidebar .brand small{display:block;font-size:11px;font-weight:400;color:#6a7a8a;margin-top:4px}
+.sidebar nav{flex:1;padding:8px 0}
+.sidebar nav a{display:flex;align-items:center;gap:10px;padding:10px 16px;color:#8a9aaa;text-decoration:none;font-size:14px;border-left:3px solid transparent;cursor:pointer;user-select:none}
+.sidebar nav a:hover{color:#e0e8f0;background:rgba(255,255,255,.04)}
+.sidebar nav a.active{color:#fff;background:rgba(59,130,246,.12);border-left-color:#3b82f6;font-weight:500}
+.sidebar .footer-nav{padding:8px 0;border-top:1px solid rgba(255,255,255,.06)}
+.main{flex:1;padding:24px 28px;max-width:calc(100vw - 200px);overflow-x:hidden}
+.page{display:none}.page.active{display:block}
+.page-header{margin-bottom:20px}
+.page-header h2{font-size:22px;font-weight:700}
+.page-header p{color:#5a6a7a;font-size:14px;margin-top:4px}
+.card{background:#fff;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.08);padding:20px 24px;margin-bottom:20px}
+.card-title{font-size:15px;font-weight:600;margin-bottom:14px;color:#2a3a4a;display:flex;align-items:center;gap:8px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px}.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px}.grid-4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:16px}
+.stat-card{background:#fff;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.08);padding:18px;text-align:center}
+.stat-card .num{font-size:28px;font-weight:700;color:#1a2332;line-height:1.2}
+.stat-card .label{font-size:12px;color:#6a7a8a;margin-top:4px}
+.stat-card.green .num{color:#22c55e}.stat-card.blue .num{color:#3b82f6}.stat-card.red .num{color:#ef4444}
+.form-row{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}
+.form-group{flex:1;min-width:120px;margin-bottom:12px}
+.form-group label{display:block;font-size:13px;font-weight:500;color:#3a4a5a;margin-bottom:4px}
+select,input[type=text],input[type=number],input[type=date]{width:100%;padding:8px 12px;border:1px solid #d0d8e0;border-radius:8px;font-size:14px;outline:none;background:#fff}
+select:focus,input:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,.12)}
+.btn{padding:8px 20px;border:none;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer}
+.btn-primary{background:#3b82f6;color:#fff}.btn-primary:hover{background:#2563eb}
+.btn-danger{background:#ef4444;color:#fff}.btn-danger:hover{background:#dc2626}
+.btn-success{background:#22c55e;color:#fff}.btn-success:hover{background:#16a34a}
+.btn-outline{background:transparent;border:1px solid #d0d8e0;color:#4a5a6a}.btn-outline:hover{background:#f0f4f8}
+.btn-sm{padding:5px 12px;font-size:12px}.btn-xs{padding:3px 8px;font-size:11px;border-radius:6px}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:14px}
+thead th{background:#f8fafc;border-bottom:2px solid #e2e8f0;padding:9px 10px;text-align:left;font-weight:600;color:#3a4a5a;white-space:nowrap}
+tbody td{padding:7px 10px;border-bottom:1px solid #edf2f7}
+tbody tr:hover{background:#f8fafc}
+.empty-msg{text-align:center;color:#8a9aaa;padding:30px 0;font-size:14px}
+.rate-bar{display:inline-flex;align-items:center;gap:8px;width:100%}
+.rate-bar .bar{height:6px;border-radius:3px;flex:1;max-width:100px}
+.rate-bar .label{min-width:38px;text-align:right;font-size:13px}
+.tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:12px;font-weight:500}
+.tag-subject{background:#e0e7ff;color:#4338ca}.tag-kp{background:#f0f4ff;color:#3b82f6;border:1px solid #dbeafe}
+.countdown-box{text-align:center;padding:16px}
+.countdown-box .days{font-size:48px;font-weight:800;line-height:1}
+.countdown-box .detail{font-size:13px;color:#8a9aaa;margin-top:6px}
+.progress-wrap{margin:8px 0}
+.progress-label{display:flex;justify-content:space-between;font-size:12px;color:#5a6a7a;margin-bottom:3px}
+.progress-bar{height:8px;background:#e2e8f0;border-radius:4px;overflow:hidden}
+.progress-bar .fill{height:100%;border-radius:4px;transition:width .4s}
+.fill-green{background:#22c55e}.fill-yellow{background:#eab308}.fill-red{background:#ef4444}
+.chart-box{position:relative;height:250px}.chart-box canvas{width:100%!important;height:100%!important}
+.chart-empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#8a9aaa;font-size:14px}
+.chart-sm{height:180px}
+.subject-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.subject-tab{padding:6px 16px;border-radius:20px;border:1px solid #d0d8e0;font-size:13px;font-weight:500;cursor:pointer;background:#fff;color:#4a5a6a;user-select:none}
+.subject-tab.active{background:#3b82f6;color:#fff;border-color:#3b82f6}
+.subject-tab:hover{border-color:#3b82f6;color:#3b82f6}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+@media(max-width:700px){.sidebar{width:56px}.sidebar .brand span,.sidebar nav a span,.sidebar .brand small{display:none}.main{padding:16px;max-width:calc(100vw-56px)}.grid-2,.grid-3,.grid-4{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+<div class="brand">📊<span> 刷题Pro</span><small>考研考公 · 智能追踪</small></div>
+<nav>
+<a class="active" onclick="goPage('dashboard')">🏠 <span>首页</span></a>
+<a onclick="goPage('entry')">📝 <span>刷题录入</span></a>
+<a onclick="goPage('wrong')">❌ <span>错题本</span></a>
+<a onclick="goPage('report')">📈 <span>学习报告</span></a>
+<a onclick="goPage('settings')">⚙️ <span>目标设置</span></a>
+</nav>
+<div class="footer-nav">
+<a onclick="exportData()">💾 <span>导出数据</span></a>
+<a onclick="document.getElementById('importInput').click()">📂 <span>导入数据</span></a>
+<input type="file" id="importInput" accept=".json" style="display:none" onchange="importData(event)">
+</div>
+</aside>
+
+<div class="main">
+
+<div class="page active" id="page-dashboard">
+<div class="page-header"><h2>🏠 学习仪表盘</h2><p>考试倒计时 · 目标差距 · 今日概览</p></div>
+<div class="grid-2" style="margin-bottom:20px">
+<div class="stat-card blue"><div class="countdown-box"><div class="days" id="countdownDays">--</div><div class="label">距考试</div><div class="detail" id="countdownDetail">请在「目标设置」中设定</div></div></div>
+<div class="card" style="margin:0"><div class="card-title">🎯 目标达成</div><div id="goalProgress"></div></div>
+</div>
+<div class="grid-4">
+<div class="stat-card"><div class="num" id="dsTotalSets">0</div><div class="label">总刷题套数</div></div>
+<div class="stat-card green"><div class="num" id="dsAvgRate">--</div><div class="label">总平均正确率</div></div>
+<div class="stat-card blue"><div class="num" id="dsBestSub">--</div><div class="label">最强科目</div></div>
+<div class="stat-card red"><div class="num" id="dsWeakSub">--</div><div class="label">薄弱科目</div></div>
+</div>
+<div class="card"><div class="card-title">📈 正确率趋势</div><div class="chart-box chart-sm"><canvas id="dsChart"></canvas><div class="chart-empty" id="dsEmpty">暂无数据</div></div></div>
+</div>
+
+<div class="page" id="page-entry">
+<div class="page-header"><h2>📝 刷题录入</h2><p>选择科目，录入套数与正确率</p></div>
+<div class="subject-tabs" id="entrySubjectTabs"></div>
+<div class="card"><div class="card-title">✏️ 添加记录</div>
+<div class="form-row">
+<div class="form-group" style="flex:1;min-width:100px"><label>刷题套数</label><input type="text" id="entryLabel" value="第1套"></div>
+<div class="form-group" style="flex:0 0 90px"><label>正确率%</label><input type="number" id="entryRate" min="0" max="100" placeholder="0-100"></div>
+<div class="form-group" style="flex:0 0 80px"><label>用时min</label><input type="number" id="entryTime" placeholder="可选"></div>
+<div class="form-group" style="flex:1"><label>知识点</label><input type="text" id="entryTags" placeholder="逗号分隔"></div>
+<div class="form-group" style="display:flex;align-items:flex-end"><button class="btn btn-primary" onclick="addRecord()">＋ 添加</button></div>
+</div></div>
+<div class="card">
+<div class="card-title" style="justify-content:space-between"><span>📋 记录 <span id="entryCount"></span></span><div><button class="btn btn-outline btn-sm" onclick="clearSubjectRecords()">清空</button><button class="btn btn-outline btn-sm" onclick="loadSampleData()" style="margin-left:6px">加载样例</button></div></div>
+<div class="table-wrap"><table><thead><tr><th>#</th><th>套数</th><th>正确率</th><th>用时</th><th>知识点</th><th>日期</th><th>操作</th></tr></thead><tbody id="entryTableBody"></tbody></table></div></div>
+<div class="card"><div class="card-title">📈 趋势图</div><div class="chart-box"><canvas id="entryChart"></canvas><div class="chart-empty" id="entryChartEmpty">暂无</div></div></div>
+</div>
+
+<div class="page" id="page-wrong">
+<div class="page-header"><h2>❌ 错题本</h2><p>记录错题，针对性复习</p></div>
+<div class="card"><div class="card-title">✏️ 添加错题</div>
+<div class="form-row">
+<div class="form-group" style="min-width:120px"><label>科目</label><select id="wSubject"></select></div>
+<div class="form-group" style="flex:1"><label>题目简述</label><input type="text" id="wQuestion" placeholder="题干关键词或题号"></div>
+<div class="form-group" style="flex:0 0 70px"><label>我的</label><input type="text" id="wMyAnswer" placeholder="A"></div>
+<div class="form-group" style="flex:0 0 70px"><label>正确</label><input type="text" id="wCorrectAnswer" placeholder="C"></div>
+</div>
+<div class="form-row">
+<div class="form-group" style="flex:1"><label>知识点</label><input type="text" id="wKp" placeholder="如：导数求极值"></div>
+<div class="form-group" style="flex:0 0 130px"><label>错误原因</label><select id="wReason"><option>知识点盲区</option><option>粗心大意</option><option>超时未做完</option><option>审题不清</option><option>计算错误</option><option>其他</option></select></div>
+<div class="form-group" style="display:flex;align-items:flex-end"><button class="btn btn-danger" onclick="addWrongQ()">＋ 添加</button></div>
+</div></div>
+<div class="card">
+<div class="card-title" style="justify-content:space-between"><span>📋 错题列表 <span id="wCount"></span></span><button class="btn btn-danger btn-xs" onclick="clearWrong()">清空</button></div>
+<div class="toolbar">
+<select id="wFilterSubject" onchange="renderWrongTable()" style="width:auto;padding:6px 10px;font-size:13px"><option value="">全部科目</option></select>
+<select id="wFilterReason" onchange="renderWrongTable()" style="width:auto;padding:6px 10px;font-size:13px"><option value="">全部原因</option><option>知识点盲区</option><option>粗心大意</option><option>超时未做完</option><option>审题不清</option><option>计算错误</option><option>其他</option></select>
+</div>
+<div class="table-wrap"><table><thead><tr><th>日期</th><th>科目</th><th>题目</th><th>我的</th><th>正确</th><th>知识点</th><th>原因</th><th>操作</th></tr></thead><tbody id="wrongTableBody"></tbody></table></div></div>
+<div class="grid-3">
+<div class="card"><div class="card-title">错误原因</div><div class="chart-box chart-sm"><canvas id="wReasonChart"></canvas><div class="chart-empty">暂无</div></div></div>
+<div class="card"><div class="card-title">薄弱知识点</div><div class="chart-box chart-sm"><canvas id="wKpChart"></canvas><div class="chart-empty">暂无</div></div></div>
+<div class="card"><div class="card-title">科目分布</div><div class="chart-box chart-sm"><canvas id="wSubChart"></canvas><div class="chart-empty">暂无</div></div></div>
+</div></div>
+
+<div class="page" id="page-report">
+<div class="page-header"><h2>📈 学习报告</h2></div>
+<div class="subject-tabs" id="reportSubjectTabs"></div>
+<div class="grid-2">
+<div class="card"><div class="card-title">正确率趋势</div><div class="chart-box"><canvas id="reportChart"></canvas><div class="chart-empty" id="reportChartEmpty">暂无</div></div></div>
+<div class="card"><div class="card-title">综合统计</div><div id="reportStats"></div></div>
+</div>
+<div class="grid-2">
+<div class="card"><div class="card-title">科目对比</div><div class="chart-box"><canvas id="reportCompareChart"></canvas><div class="chart-empty">暂无</div></div></div>
+<div class="card"><div class="card-title">用时变化</div><div class="chart-box"><canvas id="reportTimeChart"></canvas><div class="chart-empty">暂无</div></div></div>
+</div>
+<div class="card"><div class="card-title"><span>最近记录</span><button class="btn btn-outline btn-sm" onclick="generateReportText()">📄 文字报告</button></div><div id="reportDetailTable"></div></div>
+<div class="card" id="reportTextCard" style="display:none"><div class="card-title">📄 报告 <button class="btn btn-sm btn-outline" onclick="copyReport()" style="margin-left:auto">复制</button></div><pre id="reportTextContent" style="background:#f8fafc;border-radius:8px;padding:16px;font-size:13px;line-height:1.7;white-space:pre-wrap;font-family:inherit"></pre></div>
+</div>
+
+<div class="page" id="page-settings">
+<div class="page-header"><h2>⚙️ 目标设置</h2></div>
+<div class="grid-2">
+<div class="card"><div class="card-title">📚 科目管理</div>
+<div class="form-row"><div class="form-group" style="flex:1"><input type="text" id="newSubName" placeholder="新科目" onkeydown="if(event.key==='Enter')addSubject()"></div><div class="form-group" style="display:flex;align-items:flex-end"><button class="btn btn-success btn-sm" onclick="addSubject()">＋ 添加</button></div></div>
+<div id="subjectList"></div></div>
+<div class="card"><div class="card-title">🎯 目标</div>
+<div class="form-group"><label>考试日期</label><input type="date" id="examDate" onchange="saveSettings()"></div>
+<div id="subjectGoalSettings"></div>
+<button class="btn btn-primary btn-sm" onclick="saveSettings();showToast('已保存')" style="margin-top:6px">保存</button>
+</div></div>
+<div class="card"><div class="card-title">💾 数据管理</div>
+<button class="btn btn-outline btn-sm" onclick="exportData()">📤 导出</button>
+<button class="btn btn-outline btn-sm" onclick="document.getElementById('importInput').click()">📥 导入</button>
+<button class="btn btn-danger btn-sm" onclick="if(confirm('确定清除所有数据？')){localStorage.clear();location.reload()}">🗑 清除全部</button>
+</div>
+</div>
+
+</div>
+
+<div id="toastBox" style="position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a2332;color:#fff;padding:10px 24px;border-radius:8px;font-size:14px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:9999"></div>
+
+<script>
+(function(){
+'use strict';
+var SK='qp_v2',
+    d={subjects:[{id:'s1',name:'政治',target:0,color:'#3b82f6'},{id:'s2',name:'英语',target:0,color:'#22c55e'},{id:'s3',name:'数学',target:0,color:'#eab308'},{id:'s4',name:'专业课',target:0,color:'#ef4444'}],records:[],wrong:[],examDate:'',as:'s1'},
+    charts={},curSub=null;
+
+function save(){try{localStorage.setItem(SK,JSON.stringify(d))}catch(e){}}
+function id(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
+function sub(id){return d.subjects.find(function(s){return s.id===id})}
+function sn(id){var s=sub(id);return s?s.name:'?'}
+function recs(sid){return d.records.filter(function(r){return r.subjectId===sid})}
+function avg(sid){var r=recs(sid).filter(function(x){return x.rate!==void 0&&x.rate!==null&&x.rate!==''});return r.length?r.reduce(function(a,b){return a+Number(b.rate)},0)/r.length:null}
+function fmt(dd){if(!dd)return'--';var t=new Date(dd);return(t.getMonth()+1)+'月'+t.getDate()+'日'}
+function esc(s){var e=document.createElement('div');e.textContent=s;return e.innerHTML}
+function dc(n){if(charts[n]){charts[n].destroy();delete charts[n]}}
+function toast(m){var e=document.getElementById('toastBox');if(!e)return;e.textContent=m;e.style.opacity='1';clearTimeout(e._t);e._t=setTimeout(function(){e.style.opacity='0'},2000)}
+
+function load(){
+  try{var r=localStorage.getItem(SK);if(r){var p=JSON.parse(r);if(p&&p.subjects&&p.subjects.length){d=p;if(!d.wrong||!Array.isArray(d.wrong))d.wrong=[];if(!d.records||!Array.isArray(d.records))d.records=[];if(!d.as||!d.subjects.find(function(s){return s.id===d.as}))d.as=d.subjects[0].id;d.subjects.forEach(function(s,i){if(!s.color)s.color=['#3b82f6','#22c55e','#eab308','#ef4444','#a855f7','#ec4899','#14b8a6','#f97316'][i%8]});return}}}catch(e){}
+}
+load();
+
+function goPage(n){
+  var all=document.querySelectorAll('.page');
+  for(var i=0;i<all.length;i++)all[i].classList.remove('active');
+  var page=document.getElementById('page-'+n);
+  if(!page){console.error('Page not found: '+n);return}
+  page.classList.add('active');
+  var navs=document.querySelectorAll('.sidebar nav a');
+  for(i=0;i<navs.length;i++)navs[i].classList.remove('active');
+  var nav=document.querySelector('.sidebar nav a[onclick*="'+n+'"]');
+  if(nav)nav.classList.add('active');
+  try{if(n==='dashboard')dd();if(n==='entry')ep();if(n==='wrong')wp();if(n==='report')rp();if(n==='settings')sp()}catch(e){console.error('Page init error:',e)}
+}
+
+function dd(){
+  var ed=d.examDate;
+  if(ed){var diff=Math.ceil((new Date(ed)-new Date())/864e5);document.getElementById('countdownDays').textContent=diff>0?diff:diff===0?'今天！':'已过'+Math.abs(diff);document.getElementById('countdownDetail').textContent=diff>0?'还有 '+diff+' 天':diff===0?'加油！':'已过 '+Math.abs(diff)+' 天'}
+  else{document.getElementById('countdownDays').textContent='--';document.getElementById('countdownDetail').textContent='请设置考试日期'}
+  document.getElementById('goalProgress').innerHTML=d.subjects.map(function(s){var a=avg(s.id),r=s.target>0&&a!==null?Math.min(Math.round(a/s.target*100),100):0;return'<div class="progress-wrap"><div class="progress-label"><span>'+s.name+'</span><span>'+(a!==null?a.toFixed(1)+'%':'暂无')+' / '+(s.target||'未设')+'%</span></div><div class="progress-bar"><div class="fill '+(r>=80?'fill-green':r>=50?'fill-yellow':'fill-red')+'" style="width:'+r+'%"></div></div></div>'}).join('');
+  var all=d.records.filter(function(x){return x.rate!==void 0&&x.rate!==null&&x.rate!==''});
+  document.getElementById('dsTotalSets').textContent=all.length;
+  if(all.length){var ta=all.reduce(function(s,x){return s+Number(x.rate)},0)/all.length;document.getElementById('dsAvgRate').textContent=ta.toFixed(1)+'%';var b=null,w=null;d.subjects.forEach(function(s){var a=avg(s.id);if(a===null)return;if(!b||a>b.avg)b={name:s.name,avg:a};if(!w||a<w.avg)w={name:s.name,avg:a}});document.getElementById('dsBestSub').textContent=b?b.name+' '+b.avg.toFixed(1)+'%':'--';document.getElementById('dsWeakSub').textContent=w?w.name+' '+w.avg.toFixed(1)+'%':'--'}
+  else{document.getElementById('dsAvgRate').textContent='--';document.getElementById('dsBestSub').textContent='--';document.getElementById('dsWeakSub').textContent='--'}
+  dc('dsChart');
+  var al=d.records.filter(function(x){return x.rate!==void 0&&x.rate!==null&&x.rate!==''}).sort(function(a,b){return (a.date||'')-(b.date||'')||(a.label||'').localeCompare(b.label||'')});
+  var em=document.getElementById('dsEmpty');if(!al.length){if(em)em.style.display='flex';return}if(em)em.style.display='none';
+  try{charts.dsChart=new Chart(document.getElementById('dsChart').getContext('2d'),{type:'line',data:{labels:al.map(function(x){return x.label+'('+sn(x.subjectId)+')'}),datasets:[{label:'正确率',data:al.map(function(x){return Number(x.rate)}),borderColor:'#3b82f6',backgroundColor:'rgba(59,130,246,0.08)',borderWidth:2,pointBackgroundColor:al.map(function(x){var n=Number(x.rate);return n>=80?'#22c55e':n>=60?'#eab308':'#ef4444'}),pointBorderColor:'#fff',pointBorderWidth:1.5,pointRadius:4,fill:true,tension:0.3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{color:'#6a7a8a',maxRotation:30,font:{size:10}}},y:{min:0,max:100,grid:{color:'rgba(0,0,0,0.04)'},ticks:{callback:function(v){return v+'%'},stepSize:20}}},interaction:{intersect:false,mode:'index'}}})}catch(e){console.error('dsChart error:',e)}
+}
+
+function ep(){
+  var el=document.getElementById('entrySubjectTabs');
+  el.innerHTML=d.subjects.map(function(s){return'<div class="subject-tab" data-id="'+s.id+'" onclick="selectSub(\''+s.id+'\')">'+s.name+'</div>'}).join('');
+  if(!curSub)curSub=d.as||(d.subjects[0]?d.subjects[0].id:'');
+  var tab=el.querySelector('[data-id="'+curSub+'"]');if(tab)tab.classList.add('active');
+  re();ec();
+}
+function selectSub(sid){curSub=sid;d.as=sid;save();document.querySelectorAll('#entrySubjectTabs .subject-tab').forEach(function(t){t.classList.remove('active')});var t=document.querySelector('#entrySubjectTabs [data-id="'+sid+'"]');if(t)t.classList.add('active');re();ec()}
+
+function re(){
+  var tb=document.getElementById('entryTableBody');
+  var r=recs(curSub).sort(function(a,b){return (a.date||'')-(b.date||'')||(a.label||'').localeCompare(b.label||'')});
+  document.getElementById('entryCount').textContent=r.length?'('+r.length+')':'';
+  if(!r.length){tb.innerHTML='<tr><td colspan="7" class="empty-msg">暂无记录，点击上方添加</td></tr>';return}
+  tb.innerHTML=r.map(function(x,i){var n=Number(x.rate);return'<tr><td>'+(i+1)+'</td><td style="font-weight:500">'+esc(x.label)+'</td><td><div class="rate-bar"><span class="label">'+n+'%</span><span class="bar" style="width:'+n+'%;background:'+(n>=80?'#22c55e':n>=60?'#eab308':'#ef4444')+';"></span></div></td><td>'+(x.time?x.time+'m':'--')+'</td><td>'+(x.tags?x.tags.split(',').map(function(t){return'<span class="tag tag-kp">'+esc(t.trim())+'</span>'}).join(' '):'')+'</td><td style="font-size:12px;color:#6a7a8a">'+fmt(x.date)+'</td><td><button class="btn btn-danger btn-xs" onclick="delRec(\''+x.id+'\')">删</button></td></tr>'}).join('')
+}
+function ec(){
+  dc('entryChart');var r=recs(curSub).filter(function(x){return x.rate!==void 0&&x.rate!==null&&x.rate!==''}).sort(function(a,b){return (a.date||'')-(b.date||'')||(a.label||'').localeCompare(b.label||'')});
+  var em=document.getElementById('entryChartEmpty');if(!r.length){if(em)em.style.display='flex';return}if(em)em.style.display='none';
+  try{var ctx=document.getElementById('entryChart').getContext('2d'),g=ctx.createLinearGradient(0,0,0,250);g.addColorStop(0,'rgba(59,130,246,0.2)');g.addColorStop(1,'rgba(59,130,246,0.02)');
+  charts.entryChart=new Chart(ctx,{type:'line',data:{labels:r.map(function(x){return x.label}),datasets:[{label:'正确率',data:r.map(function(x){return Number(x.rate)}),borderColor:'#3b82f6',backgroundColor:g,borderWidth:2.5,pointBackgroundColor:r.map(function(x){var n=Number(x.rate);return n>=80?'#22c55e':n>=60?'#eab308':'#ef4444'}),pointBorderColor:'#fff',pointBorderWidth:2,pointRadius:5,fill:true,tension:0.3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return'正确率: '+c.parsed.y+'%'}}}},scales:{x:{grid:{display:false},ticks:{maxRotation:30}},y:{min:0,max:100,grid:{color:'rgba(0,0,0,0.04)'},ticks:{callback:function(v){return v+'%'},stepSize:20}}},interaction:{intersect:false,mode:'index'}}})}catch(e){console.error('entryChart error:',e)}
+}
+
+function addRecord(){if(!curSub){toast('请先选择科目');return}var label=document.getElementById('entryLabel').value.trim(),rate=parseFloat(document.getElementById('entryRate').value),time=parseFloat(document.getElementById('entryTime').value)||null,tags=document.getElementById('entryTags').value.trim();if(!label){toast('请输入套数');return}if(isNaN(rate)||rate<0||rate>100){toast('正确率0-100');return}
+d.records.push({id:id(),subjectId:curSub,label:label,rate:rate,time:time,tags:tags,date:new Date().toISOString().slice(0,10)});save();re();ec();dd();var m=label.match(/(\d+)/);if(m)document.getElementById('entryLabel').value=label.replace(m[1],parseInt(m[1])+1);document.getElementById('entryRate').value='';document.getElementById('entryTime').value='';document.getElementById('entryTags').value='';toast('已添加')}
+function delRec(rid){d.records=d.records.filter(function(r){return r.id!==rid});save();re();ec();dd()}
+function clearSubjectRecords(){if(!curSub)return;if(!confirm('清空"'+sn(curSub)+'"的记录？'))return;d.records=d.records.filter(function(r){return r.subjectId!==curSub});save();re();ec();dd();toast('已清空')}
+function loadSampleData(){if(!curSub){toast('先选科目');return}if(recs(curSub).length&&!confirm('追加样例？'))return;var sm=[{label:'第1套',rate:42,time:45,tags:'基础'},{label:'第2套',rate:48,time:42,tags:'基础'},{label:'第3套',rate:55,time:40,tags:'中等'},{label:'第4套',rate:51,time:38,tags:'中等'},{label:'第5套',rate:63,time:35,tags:'提高'},{label:'第6套',rate:68,time:36,tags:'提高'},{label:'第7套',rate:72,time:33,tags:'综合'},{label:'第8套',rate:78,time:32,tags:'综合'}],t=new Date();sm.forEach(function(s,i){var dd=new Date(t);dd.setDate(dd.getDate()-(sm.length-i)*3);d.records.push({id:id(),subjectId:curSub,label:s.label,rate:s.rate,time:s.time,tags:s.tags,date:dd.toISOString().slice(0,10)})});save();re();ec();dd();toast('已加载8条')}
+
+function wp(){document.getElementById('wFilterSubject').innerHTML='<option value="">全部</option>'+d.subjects.map(function(s){return'<option value="'+s.id+'">'+s.name+'</option>'}).join('');document.getElementById('wSubject').innerHTML=d.subjects.map(function(s){return'<option value="'+s.id+'">'+s.name+'</option>'}).join('');renderWrongTable();wc()}
+function addWrongQ(){var sid=document.getElementById('wSubject').value,q=document.getElementById('wQuestion').value.trim(),ma=document.getElementById('wMyAnswer').value.trim(),ca=document.getElementById('wCorrectAnswer').value.trim(),kp=document.getElementById('wKp').value.trim(),r=document.getElementById('wReason').value;if(!q){toast('请输入题目');return}d.wrong.push({id:id(),subjectId:sid,question:q,myAnswer:ma||'--',correctAnswer:ca||'--',kp:kp||'未分类',reason:r,date:new Date().toISOString().slice(0,10)});save();renderWrongTable();wc();document.getElementById('wQuestion').value='';document.getElementById('wMyAnswer').value='';document.getElementById('wCorrectAnswer').value='';document.getElementById('wKp').value='';toast('已添加')}
+function clearWrong(){if(!confirm('清空所有错题？'))return;d.wrong=[];save();renderWrongTable();wc();toast('已清空')}
+function renderWrongTable(){var tb=document.getElementById('wrongTableBody'),fs=document.getElementById('wFilterSubject').value,fr=document.getElementById('wFilterReason').value,l=d.wrong.slice();if(fs)l=l.filter(function(r){return r.subjectId===fs});if(fr)l=l.filter(function(r){return r.reason===fr});l.sort(function(a,b){return b.date.localeCompare(a.date)});document.getElementById('wCount').textContent='('+l.length+')';if(!l.length){tb.innerHTML='<tr><td colspan="8" class="empty-msg">暂无错题记录</td></tr>';return}tb.innerHTML=l.map(function(r){return'<tr><td style="font-size:12px;color:#6a7a8a">'+fmt(r.date)+'</td><td><span class="tag tag-subject">'+esc(sn(r.subjectId))+'</span></td><td>'+esc(r.question)+'</td><td style="color:#ef4444">'+esc(r.myAnswer)+'</td><td style="color:#22c55e;font-weight:500">'+esc(r.correctAnswer)+'</td><td><span class="tag tag-kp">'+esc(r.kp)+'</span></td><td>'+r.reason+'</td><td><button class="btn btn-danger btn-xs" onclick="delWrong(\''+r.id+'\')">删</button></td></tr>'}).join('')}
+function delWrong(rid){d.wrong=d.wrong.filter(function(r){return r.id!==rid});save();renderWrongTable();wc()}
+function wc(){var l=d.wrong;
+  dc('wReasonChart');if(!l.length){var e=document.querySelector('#page-wrong .chart-empty');if(e)e.style.display='flex'}else{var re={};l.forEach(function(x){re[x.reason]=(re[x.reason]||0)+1});try{charts.wReasonChart=new Chart(document.getElementById('wReasonChart').getContext('2d'),{type:'doughnut',data:{labels:Object.keys(re),datasets:[{data:Object.values(re),backgroundColor:['#ef4444','#eab308','#3b82f6','#a855f7','#ec4899','#6b7280']}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:11}}}}}})}catch(e){}}
+  dc('wKpChart');if(l.length){var k={};l.forEach(function(x){k[x.kp]=(k[x.kp]||0)+1});var s=Object.entries(k).sort(function(a,b){return b[1]-a[1]}).slice(0,8);try{charts.wKpChart=new Chart(document.getElementById('wKpChart').getContext('2d'),{type:'bar',data:{labels:s.map(function(x){return x[0]}),datasets:[{label:'错题数',data:s.map(function(x){return x[1]}),backgroundColor:'#f87171',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{stepSize:1}},y:{grid:{display:false}}}}})}catch(e){}}
+  dc('wSubChart');if(l.length){var su={};l.forEach(function(x){var n=sn(x.subjectId);su[n]=(su[n]||0)+1});try{charts.wSubChart=new Chart(document.getElementById('wSubChart').getContext('2d'),{type:'bar',data:{labels:Object.keys(su),datasets:[{label:'错题数',data:Object.values(su),backgroundColor:d.subjects.map(function(x){return x.color}),borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{stepSize:1}},x:{grid:{display:false}}}}})}catch(e){}}
+}
+
+function rp(){var el=document.getElementById('reportSubjectTabs');el.innerHTML=d.subjects.map(function(s){return'<div class="subject-tab" data-id="'+s.id+'" onclick="selRpt(\''+s.id+'\')">'+s.name+'</div>'}).join('');if(d.subjects[0])selRpt(d.subjects[0].id)}
+function selRpt(sid){document.querySelectorAll('#reportSubjectTabs .subject-tab').forEach(function(t){t.classList.remove('active')});var t=document.querySelector('#reportSubjectTabs [data-id="'+sid+'"]');if(t)t.classList.add('active');renderReport(sid)}
+function renderReport(sid){var r=recs(sid).filter(function(x){return x.rate!==void 0&&x.rate!==null&&x.rate!==''}).sort(function(a,b){return (a.date||'')-(b.date||'')||(a.label||'').localeCompare(b.label||'')});
+  dc('reportChart');var em=document.getElementById('reportChartEmpty');if(!r.length){if(em)em.style.display='flex'}else{if(em)em.style.display='none';
+  try{var ctx=document.getElementById('reportChart').getContext('2d'),g=ctx.createLinearGradient(0,0,0,250);g.addColorStop(0,'rgba(59,130,246,0.2)');g.addColorStop(1,'rgba(59,130,246,0.02)');charts.reportChart=new Chart(ctx,{type:'line',data:{labels:r.map(function(x){return x.label}),datasets:[{label:'正确率',data:r.map(function(x){return Number(x.rate)}),borderColor:'#3b82f6',backgroundColor:g,borderWidth:2.5,pointBackgroundColor:r.map(function(x){var n=Number(x.rate);return n>=80?'#22c55e':n>=60?'#eab308':'#ef4444'}),pointBorderColor:'#fff',pointBorderWidth:2,pointRadius:5,fill:true,tension:0.3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return'正确率: '+c.parsed.y+'%'}}}},scales:{x:{grid:{display:false}},y:{min:0,max:100,grid:{color:'rgba(0,0,0,0.04)'},ticks:{callback:function(v){return v+'%'},stepSize:20}}},interaction:{intersect:false,mode:'index'}}})}catch(e){}}
+  var as=av=r.length?r.reduce(function(s,x){return s+Number(x.rate)},0)/r.length:null,mx=r.length?Math.max.apply(null,r.map(function(x){return Number(x.rate)})):null,mn=r.length?Math.min.apply(null,r.map(function(x){return Number(x.rate)})):null,tr=r.length>=2?Number(r[r.length-1].rate)-Number(r[0].rate):null,ht=r.some(function(x){return x.time}),at=ht?r.filter(function(x){return x.time}).reduce(function(s,x){return s+Number(x.time)},0)/r.filter(function(x){return x.time}).length:null;
+  document.getElementById('reportStats').innerHTML='<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px"><div class="stat-card"><div class="num" style="font-size:20px">'+(av!==null?av.toFixed(1)+'%':'--')+'</div><div class="label">平均</div></div><div class="stat-card green"><div class="num" style="font-size:20px">'+(mx!==null?mx+'%':'--')+'</div><div class="label">最高</div></div><div class="stat-card red"><div class="num" style="font-size:20px">'+(mn!==null?mn+'%':'--')+'</div><div class="label">最低</div></div><div class="stat-card '+(tr!==null?(tr>=0?'green':'red'):'')+'"><div class="num" style="font-size:20px">'+(tr!==null?(tr>0?'↑ ':'↓ ')+Math.abs(tr).toFixed(1)+'%':'--')+'</div><div class="label">趋势</div></div>'+(at!==null?'<div class="stat-card blue"><div class="num" style="font-size:20px">'+at.toFixed(0)+'min</div><div class="label">平均用时</div></div>':'')+'<div class="stat-card"><div class="num" style="font-size:20px">'+r.length+'</div><div class="label">套数</div></div></div>';
+  dc('reportCompareChart');var vs=d.subjects.map(function(s){return{name:s.name,avg:avg(s.id),color:s.color}}).filter(function(x){return x.avg!==null});if(vs.length){try{charts.reportCompareChart=new Chart(document.getElementById('reportCompareChart').getContext('2d'),{type:'bar',data:{labels:vs.map(function(x){return x.name}),datasets:[{label:'平均正确率',data:vs.map(function(x){return x.avg}),backgroundColor:vs.map(function(x){return x.color}),borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{min:0,max:100,grid:{color:'rgba(0,0,0,0.04)'},ticks:{callback:function(v){return v+'%'}}},x:{grid:{display:false}}}}})}catch(e){}}
+  dc('reportTimeChart');var rt=recs(sid).filter(function(x){return x.time}).sort(function(a,b){return (a.date||'')-(b.date||'')||(a.label||'').localeCompare(b.label||'')});if(rt.length){try{charts.reportTimeChart=new Chart(document.getElementById('reportTimeChart').getContext('2d'),{type:'line',data:{labels:rt.map(function(x){return x.label}),datasets:[{label:'用时(min)',data:rt.map(function(x){return Number(x.time)}),borderColor:'#22c55e',backgroundColor:'rgba(34,197,94,0.08)',borderWidth:2,pointBackgroundColor:'#22c55e',pointBorderColor:'#fff',pointBorderWidth:1.5,pointRadius:4,fill:true,tension:0.3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{grid:{color:'rgba(0,0,0,0.04)'},beginAtZero:true},x:{grid:{display:false}}},interaction:{intersect:false,mode:'index'}}})}catch(e){}}
+  var dt=r.slice(-10).reverse().map(function(x){return'<tr><td>'+x.label+'</td><td>'+x.rate+'%</td><td>'+(x.time?x.time+'min':'--')+'</td><td>'+(x.tags||'--')+'</td><td style="font-size:12px;color:#6a7a8a">'+fmt(x.date)+'</td></tr>'}).join('');document.getElementById('reportDetailTable').innerHTML=r.length?'<table><thead><tr><th>套数</th><th>正确率</th><th>用时</th><th>知识点</th><th>日期</th></tr></thead><tbody>'+dt+'</tbody></table>':'<div class="empty-msg">暂无</div>'}
+function generateReportText(){var c=document.getElementById('reportTextCard');c.style.display='block';var l=[],now=new Date();l.push('📊 学习总结报告 — '+now.getFullYear()+'年'+(now.getMonth()+1)+'月'+now.getDate()+'日');l.push('='.repeat(30));l.push('');d.subjects.forEach(function(s){var a=avg(s.id),rr=recs(s.id).filter(function(x){return x.rate!==void 0&&x.rate!==null&&x.rate!==''});if(!rr.length)return;l.push('【'+s.name+'】');l.push('  刷题 '+rr.length+' 套 · 平均 '+a.toFixed(1)+'%');l.push('  最高 '+Math.max.apply(null,rr.map(function(x){return Number(x.rate)}))+'% · 最低 '+Math.min.apply(null,rr.map(function(x){return Number(x.rate)}))+'%');if(rr.length>=2){var f=Number(rr[0].rate),la=Number(rr[rr.length-1].rate),t=la-f;l.push('  趋势: '+(t>0?'📈 进步':t<0?'📉 退步':'➡ 持平')+' '+Math.abs(t).toFixed(1)+'%')}if(s.target>0&&a!==null){var g=s.target-a;l.push('  目标 '+s.target+'% · '+(g>0?'差 '+g.toFixed(1)+'%':'已达标 ✅'))}l.push('')});if(d.wrong.length){l.push('【错题本】');l.push('  累计 '+d.wrong.length+' 道');var re={};d.wrong.forEach(function(x){re[x.reason]=(re[x.reason]||0)+1});var tr=Object.entries(re).sort(function(a,b){return b[1]-a[1]})[0];l.push('  主要原因: '+tr[0]+' ('+tr[1]+'次)');var k={};d.wrong.forEach(function(x){k[x.kp]=(k[x.kp]||0)+1});var tk=Object.entries(k).sort(function(a,b){return b[1]-a[1]}).slice(0,3);if(tk.length)l.push('  薄弱点: '+tk.map(function(x){return x[0]+'('+x[1]+'次)'}).join('、'));l.push('')}l.push('💪 继续加油！');document.getElementById('reportTextContent').textContent=l.join('\n');toast('报告已生成');c.scrollIntoView({behavior:'smooth'})}
+function copyReport(){var t=document.getElementById('reportTextContent');if(!t)return;navigator.clipboard.writeText(t.textContent).then(function(){toast('已复制')}).catch(function(){toast('复制失败，请手动选择复制')})}
+
+function sp(){var el=document.getElementById('subjectList');if(!d.subjects.length){el.innerHTML='<div class="empty-msg">暂无科目</div>'}else{el.innerHTML=d.subjects.map(function(s){return'<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;border:1px solid #edf2f7;border-radius:8px;margin-bottom:6px"><span style="width:12px;height:12px;border-radius:3px;background:'+s.color+';display:inline-block"></span><span style="flex:1;font-weight:500">'+esc(s.name)+'</span><input type="color" value="'+s.color+'" onchange="(function(v,c){var x=d.subjects.find(function(y){return y.id===c});if(x){x.color=v;save()}})(this.value,\''+s.id+'\')" style="width:32px;height:28px;padding:0;border:none;cursor:pointer"><button class="btn btn-danger btn-xs" onclick="delSub(\''+s.id+'\')">删</button></div>'}).join('')}
+  document.getElementById('subjectGoalSettings').innerHTML=d.subjects.map(function(s){return'<div class="form-group" style="margin-bottom:8px"><label style="display:flex;justify-content:space-between"><span>'+s.name+'</span><span style="font-weight:400;color:#8a9aaa">'+(avg(s.id)!==null?avg(s.id).toFixed(1)+'%':'暂无')+'</span></label><input type="number" class="gi" data-id="'+s.id+'" value="'+(s.target||0)+'" min="0" max="100" style="width:100%;padding:7px 10px;border:1px solid #d0d8e0;border-radius:8px;font-size:14px;outline:none"></div>'}).join('');if(d.examDate)document.getElementById('examDate').value=d.examDate}
+function addSubject(){var n=document.getElementById('newSubName').value.trim();if(!n){toast('请输入名称');return}if(d.subjects.some(function(s){return s.name===n})){toast('科目已存在');return}var c=['#3b82f6','#22c55e','#eab308','#ef4444','#a855f7','#ec4899','#14b8a6','#f97316'];d.subjects.push({id:'s'+id(),name:n,target:0,color:c[d.subjects.length%c.length]});save();document.getElementById('newSubName').value='';sp();toast('已添加')}
+function delSub(sid){if(d.subjects.length<=1){toast('至少保留一个科目');return}if(!confirm('删除此科目？相关的刷题记录不会删除。'))return;d.subjects=d.subjects.filter(function(s){return s.id!==sid});if(d.as===sid)d.as=d.subjects[0]?d.subjects[0].id:'';save();sp();toast('已删除')}
+function saveSettings(){d.examDate=document.getElementById('examDate').value;var gi=document.querySelectorAll('.gi');gi.forEach(function(el){var s=d.subjects.find(function(x){return x.id===el.dataset.id});if(s)s.target=parseFloat(el.value)||0});save();dd()}
+
+window.exportData=function(){var b=new Blob([JSON.stringify(d,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='刷题数据_'+new Date().toISOString().slice(0,10)+'.json';a.click();toast('已导出')};
+window.importData=function(e){var f=e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(ev){try{var i=JSON.parse(ev.target.result);if(!i.subjects||!i.records){toast('无效的数据文件');return}if(!confirm('导入将覆盖当前所有数据，确定继续？'))return;d=i;if(!d.wrong)d.wrong=[];save();location.reload()}catch(err){toast('文件解析失败')}};r.readAsText(f);e.target.value=''};
+
+// 暴露给 HTML onclick
+window.goPage=goPage;
+window.selectSub=selectSub;
+window.selRpt=selRpt;
+window.addRecord=addRecord;
+window.delRec=delRec;
+window.clearSubjectRecords=clearSubjectRecords;
+window.loadSampleData=loadSampleData;
+window.addWrongQ=addWrongQ;
+window.delWrong=delWrong;
+window.clearWrong=clearWrong;
+window.renderWrongTable=renderWrongTable;
+window.generateReportText=generateReportText;
+window.copyReport=copyReport;
+window.addSubject=addSubject;
+window.delSub=delSub;
+window.saveSettings=saveSettings;
+window.showToast=toast;
+
+// 初始加载
+goPage('dashboard');
+})();
+</script>
+</body>
+</html>
